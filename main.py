@@ -65,7 +65,7 @@ def add_measurement():
     print(new_measurement)
     db.session.add(new_measurement)
     db.session.commit()
-
+    
     return measurement_schema.jsonify(new_measurement)
 
 @app.route("/")
@@ -83,21 +83,14 @@ resource_fields = {
     'conductivity': fields.Float
 }
 
-class Refresh(Resource):
+class Chart_data(Resource):
     @marshal_with(resource_fields)
     def get(self):
         result = Measurement.query.all()
-        print(type(result[1]))
         return result
 
-api.add_resource(Refresh, '/refresh')
+api.add_resource(Chart_data, '/chart_data')
 
-'''
-@app.route("/refresh", methods=['GET'])
-def refresh_data():
-
-    return {}
-'''
 
 # Run Server
 if __name__ == '__main__':
