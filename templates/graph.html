@@ -1,6 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div style="position: relative; height:30vh; width:30vw">
+    <div>
+        <h2>Bomba d'agua</h2>
+        <input type="range" min="1" max="60" value="20" class="slider" id="time_on">
+        <p>Tempo ligado: <span id="time_on_output"></span> seconds</p>
+        <input type="range" min="1" max="60" value="20" class="slider" id="time_off">
+        <p>Tempo desligado: <span id="time_off_output"></span> seconds</p>
+    </div>
+
+    <div>
+        <h2>Limites de luminosidade</h2>
+        <input type="range" min="60" max="200" value="20" class="slider" id="lux_max">
+        <p>Luminosidade máxima: <span id="lux_max_output"></span> lux</p>
+        <input type="range" min="10" max="55" value="20" class="slider" id="lux_min">
+        <p>Luminosidade mínima: <span id="lux_min_output"></span> lux</p>
+    </div>
+
+    <div style="position: relative; height:30vh; width:60vw">
         <div>
             <canvas id="humidity_chart"></canvas>
         </div>
@@ -17,5 +33,6 @@
             <canvas id="conductivity_chart" ></canvas>
         </div>
     </div>
+
 
 {% endblock content %}

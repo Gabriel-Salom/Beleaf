@@ -220,3 +220,65 @@ var conductivity_chart = new Chart(ctx, {
         }
     }
 });
+
+// =========================================================
+// Teste do botão slider
+
+// Tempo de acionamento da bomba
+var time_on = document.getElementById("time_on");
+var time_off = document.getElementById("time_off");
+
+var time_on_output = document.getElementById("time_on_output");
+var time_off_output = document.getElementById("time_off_output");
+
+time_on_output.innerHTML = time_on.value;
+time_off_output.innerHTML = time_off.value;
+
+time_on.oninput = function() {
+    time_on_output.innerHTML = this.value;
+}
+
+time_off.oninput = function() {
+    time_off_output.innerHTML = this.value;
+}
+
+// Limites de luminosidade
+var lux_max = document.getElementById("lux_max");
+var lux_min = document.getElementById("lux_min");
+
+var lux_max_output = document.getElementById("lux_max_output");
+var lux_min_output = document.getElementById("lux_min_output");
+
+lux_max_output.innerHTML = lux_max.value;
+lux_min_output.innerHTML = lux_min.value;
+
+lux_max.oninput = function() {
+    lux_max_output.innerHTML = this.value;
+}
+
+lux_min.oninput = function() {
+    lux_min_output.innerHTML = this.value;
+}
+
+// When the user releases the slider, sends the new data to the database
+/*
+time_on.onchange = function() {
+    $.post( "/config_elements", function( data ) {
+        $( ".result" ).html( data );
+      });
+}
+*/
+
+time_off.onchange = function() {
+    console.log(this.value);
+}
+
+lux_max.onchange = function() {
+    console.log(this.value);
+}
+
+lux_min.onchange = function() {
+    console.log(this.value);
+}
+
+// =========================================================
