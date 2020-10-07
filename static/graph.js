@@ -93,6 +93,15 @@ var humidity_chart = new Chart(ctx, {
         ],
         borderWidth: 1
         }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    display: false
+                }
+            }]
+        }
     }
 });
 
@@ -113,6 +122,15 @@ var light_chart = new Chart(ctx, {
         ],
         borderWidth: 1
         }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    display: false
+                }
+            }]
+        }
     }
 });
 
@@ -133,6 +151,15 @@ var temperature_chart = new Chart(ctx, {
         ],
         borderWidth: 1
         }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    display: false
+                }
+            }]
+        }
     }
 });
 
@@ -153,6 +180,15 @@ var ph_chart = new Chart(ctx, {
         ],
         borderWidth: 1
         }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    display: false
+                }
+            }]
+        }
     }
 });
 
@@ -173,5 +209,14 @@ var conductivity_chart = new Chart(ctx, {
         ],
         borderWidth: 1
         }]
+    },
+    options: {
+        scales: {
+            xAxes: [{
+                ticks: {
+                    display: false
+                }
+            }]
+        }
     }
 });
