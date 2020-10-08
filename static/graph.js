@@ -261,24 +261,42 @@ lux_min.oninput = function() {
 }
 
 // When the user releases the slider, sends the new data to the database
-/*
+function GenerateJSON()
+{
+    var jsonData = {}
+    jsonData['lux_max'] = parseInt(lux_max.value);
+    jsonData['lux_min'] = parseInt(lux_min.value);
+    jsonData['time_on'] = parseInt(time_on.value);
+    jsonData['time_off'] = parseInt(time_off.value);
+
+    console.log(jsonData);
+
+      $.ajax({
+        type: "POST",
+        url: "/config_elements",
+        contentType: 'application/json',
+        data: JSON.stringify(jsonData),
+        dataType: 'json',
+        success: function(data) {
+            console.log(data)
+        }
+        });
+ }
+
 time_on.onchange = function() {
-    $.post( "/config_elements", function( data ) {
-        $( ".result" ).html( data );
-      });
+    GenerateJSON();
 }
-*/
 
 time_off.onchange = function() {
-    console.log(this.value);
+    GenerateJSON();
 }
 
 lux_max.onchange = function() {
-    console.log(this.value);
+    GenerateJSON();
 }
 
 lux_min.onchange = function() {
-    console.log(this.value);
+    GenerateJSON();
 }
 
 // =========================================================

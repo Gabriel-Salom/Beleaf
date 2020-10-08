@@ -127,12 +127,13 @@ class Config_data(Resource):
             db.session.add(new_config)
             db.session.commit()
         else:
+            print(request.json['lux_max'])
             result.lux_max = request.json['lux_max']
             result.lux_min = request.json['lux_min']
             result.time_on = request.json['time_on']
             result.time_off = request.json['time_off']
             db.session.commit()
-        return 201
+        return {}
 
 api.add_resource(Chart_data, '/chart_data')
 api.add_resource(Config_data, '/config_elements')
