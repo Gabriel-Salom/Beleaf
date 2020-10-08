@@ -1,7 +1,6 @@
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
-from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy
 import os
 import json
@@ -18,8 +17,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init db
 db = SQLAlchemy(app)
-# Init ma
-ma = Marshmallow(app)
 
 # Classes/Models for the database
 class Measurement(db.Model):
