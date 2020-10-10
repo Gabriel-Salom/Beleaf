@@ -138,5 +138,5 @@ api.add_resource(Config_data, '/config_elements')
 
 # Run Server
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(port =11942, host= '0.0.0.0')
+    #app.run(debug=True)
+    app.run(host= '0.0.0.0')
