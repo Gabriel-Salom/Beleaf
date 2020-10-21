@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
+from functools import wraps
 import os
 import json
 import webbrowser
@@ -17,6 +18,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init db
 db = SQLAlchemy(app)
+
+user_beleaf = 'beleaf_green'
+password_beleaf = 'beleaf_teste'
+
+def auth_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if auth and auth.username == user_beleaf and auth.password == password_beleaf:
+            return f(*args, **kwargs)
+
+        return make_response('Could not verify authentication!', 401, {'WWW-authenticate' : 'Basic realm="Login Required"'})
+    return decorated
 
 # Classes/Models for the database
 class Measurement(db.Model):
@@ -54,6 +68,7 @@ class Config(db.Model):
 
 # Loading web page for users
 @app.route("/")
+@auth_required
 def visualize_data():
     values = Measurement.query.all()
     return render_template('graph.html', title='data', values = values)
@@ -79,10 +94,12 @@ config_fields = {
 
 # Restful API for sending and recieving measurements
 class Chart_data(Resource):
+    @auth_required
     @marshal_with(measurement_fields)
     def get(self):
         result = Measurement.query.all()
         return result
+
     def post(self):
         now = datetime.now()
         date_string = now.strftime("%d/%m/%Y %H:%M:%S")
@@ -98,10 +115,12 @@ class Chart_data(Resource):
         db.session.commit()
         return 201
 
+
 # Restful API for sending and recieving configurations
 class Config_data(Resource):
+    @auth_required
     @marshal_with(config_fields)
-    def get(self):
+    def get(self): 
         result = Config.query.filter_by(id=1).first()
         if result == None:
             lux_max = 60
@@ -118,19 +137,18 @@ class Config_data(Resource):
         if result == None:
             lux_max = 60
             lux_min = 50
-            time_on = 20
+            time_on = 20 
             time_off = 20
             new_config = Config(lux_max, lux_min, time_on, time_off)
             db.session.add(new_config)
             db.session.commit()
         else:
-            print(request.json['lux_max'])
             result.lux_max = request.json['lux_max']
             result.lux_min = request.json['lux_min']
             result.time_on = request.json['time_on']
             result.time_off = request.json['time_off']
             db.session.commit()
-        return {}
+        return 201
 
 api.add_resource(Chart_data, '/chart_data')
 api.add_resource(Config_data, '/config_elements')
