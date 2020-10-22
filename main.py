@@ -1,8 +1,11 @@
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response
+from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response, send_file
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
+from werkzeug.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
+from io import StringIO
+import csv
 import os
 import json
 import webbrowser
@@ -72,6 +75,38 @@ class Config(db.Model):
 def visualize_data():
     values = Measurement.query.all()
     return render_template('graph.html', title='data', values = values)
+
+# Generating csv from the database
+@auth_required
+@app.route('/download')
+def csv_data():
+    values = Measurement.query.all()
+    def generate():
+        data = StringIO()
+        w = csv.writer(data)
+        yield data.getvalue()
+        data.seek(0)
+        data.truncate(0)
+
+        # write each log item
+        for item in values:
+            w.writerow((
+                item.date_posted,
+                item.humidity,
+                item.light,
+                item.temperature,
+                item.ph,
+                item.conductivity
+            ))
+            yield data.getvalue()
+            data.seek(0)
+            data.truncate(0)
+
+    # stream the response as the data is generated
+    response = Response(generate(), mimetype='text/csv')
+    # add a filename
+    response.headers.set("Content-Disposition", "attachment", filename="log.csv")
+    return response
 
 # Rest API for sending JSON to the front end
 measurement_fields = {
@@ -156,5 +191,5 @@ api.add_resource(Config_data, '/config_elements')
 
 # Run Server
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host= '0.0.0.0')
+    app.run(debug=True)
+    #app.run(host= '0.0.0.0')

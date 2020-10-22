@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block content %}
     <div>
-        <h2>Bomba d'agua</h2>
+        <h2>Bomba d'água</h2>
         <input type="range" min="1" max="60" value="20" class="slider" id="time_on">
-        <p>Tempo ligado: <span id="time_on_output"></span> seconds</p>
+        <p>Tempo ligado: <span id="time_on_output"></span> segundos</p>
         <input type="range" min="1" max="60" value="20" class="slider" id="time_off">
-        <p>Tempo desligado: <span id="time_off_output"></span> seconds</p>
+        <p>Tempo desligado: <span id="time_off_output"></span> segundos</p>
     </div>
 
     <div>
@@ -15,6 +15,8 @@
         <input type="range" min="10" max="55" value="20" class="slider" id="lux_min">
         <p>Luminosidade mínima: <span id="lux_min_output"></span> lux</p>
     </div>
+
+    <div><a href="/download">Baixar dados em csv</a></div>
 
     <div style="position: relative; height:30vh; width:60vw">
         <div>
@@ -33,6 +35,7 @@
             <canvas id="conductivity_chart" ></canvas>
         </div>
     </div>
+    <button ></button>
 
 
 {% endblock content %}
