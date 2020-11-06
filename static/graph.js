@@ -39,6 +39,14 @@ function update_lists(){
         conductivity_chart.update();
     };
 
+function clear_chart(){
+    humidity_chart.clear();
+    light_chart.clear();
+    temperature_chart.clear();
+    ph_chart.clear();
+    conductivity_chart.clear();
+}
+
 // Função para preencher o gráfico utilizando os valores existentes no banco de dados inicialmente
 create_graph();
 
@@ -61,7 +69,7 @@ setInterval(update_graph,3000);
 
 function update_graph(){
     $.getJSON(api_url, function(data) {
-        if(data.length != labels_date.length){
+        if(data.length > labels_date.length){
             for(var i = labels_date.length; i < data.length; i++) {
                 labels_date.push(data[i].date_posted);
                 humidity_list.push(data[i].humidity);
@@ -70,7 +78,16 @@ function update_graph(){
                 ph_list.push(data[i].ph);
                 conductivity_list.push(data[i].conductivity);
             }
-        update_lists();
+            update_lists();
+        }
+        if(data.length == 0){
+            labels_date = [];
+            humidity_list = [];
+            light_list = [];
+            temperature_list = [];
+            ph_list = [];
+            conductivity_list = [];
+            clear_chart();
         }
     })
 };
@@ -300,3 +317,29 @@ lux_min.onchange = function() {
 }
 
 // =========================================================
+
+
+function confirmDelete() {
+    swal({
+        title: "Atenção!",
+        text: "Deseja limpar a base de dados? Uma vez realizado, o ato não poderá ser desfeito.",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      }).then((isConfirm) => {
+        if (isConfirm) {
+        $.ajax({
+            type: "DELETE",
+            url: "/chart_data",
+            success: function() {
+                swal("Dados deletados com sucesso", "success");
+            },
+            error: function () {
+                swal("Erro ao deletar!", "Por favor tente novamente", "error");
+            }
+        });
+    }else{
+        swal("Cancelado!", "Os dados estão a salvo... por enquanto!", "error");
+        } 
+    });
+};

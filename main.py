@@ -149,6 +149,12 @@ class Chart_data(Resource):
         db.session.add(new_measurement)
         db.session.commit()
         return 201
+    
+    def delete(self):
+        num_rows_deleted = db.session.query(Measurement).delete()
+        print(num_rows_deleted)
+        db.session.commit()
+        return 201
 
 
 # Restful API for sending and recieving configurations
