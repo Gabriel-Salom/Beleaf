@@ -8,6 +8,9 @@ var temperature_list = [];
 var ph_list = [];
 var conductivity_list = [];
 
+// Variavel para controle do led
+var automatic_light = 0;
+
 // Api URL
 const api_url = '/chart_data';
 
@@ -239,8 +242,6 @@ var conductivity_chart = new Chart(ctx, {
 });
 
 // =========================================================
-// Teste do botão slider
-
 // Tempo de acionamento da bomba
 var time_on = document.getElementById("time_on");
 var time_off = document.getElementById("time_off");
@@ -277,6 +278,29 @@ lux_min.oninput = function() {
     lux_min_output.innerHTML = this.value;
 }
 
+// Intensidade do led
+var light_intensity = document.getElementById("light_intensity");
+
+var light_intensity_output = document.getElementById("light_intensity_output");
+light_intensity_output.innerHTML = light_intensity.value;
+light_intensity.oninput = function() {
+    light_intensity_output.innerHTML = this.value;
+}
+
+function toggleState(item){
+    if(item.className == "on") {
+       item.className="off";
+       item.value="off";
+       automatic_light = 0;
+       GenerateJSON();
+    } else {
+       item.className="on";
+       item.value="on";
+       automatic_light = 1;
+       GenerateJSON();
+    }
+ }
+
 // When the user releases the slider, sends the new data to the database
 function GenerateJSON()
 {
@@ -285,6 +309,8 @@ function GenerateJSON()
     jsonData['lux_min'] = parseInt(lux_min.value);
     jsonData['time_on'] = parseInt(time_on.value);
     jsonData['time_off'] = parseInt(time_off.value);
+    jsonData['light_intensity'] = parseInt(light_intensity.value);
+    jsonData['automatic_light'] = parseInt(automatic_light);;
 
     console.log(jsonData);
 
@@ -316,7 +342,12 @@ lux_min.onchange = function() {
     GenerateJSON();
 }
 
+light_intensity.onchange = function() {
+    GenerateJSON();
+}
+
 // =========================================================
+// Deletar todos os dados
 
 
 function confirmDelete() {

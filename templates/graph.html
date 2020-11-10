@@ -16,6 +16,13 @@
         <p>Luminosidade mínima: <span id="lux_min_output"></span> lux</p>
     </div>
 
+    <div>
+        <input type="button" id="automatic_light" value="off" class="off" onclick="toggleState(this)">
+        <h2>Intensidade do led</h2>
+        <input type="range" min="0" max="150" value="0" class="slider" id="light_intensity">
+        <p><span id="light_intensity_output"></span> %</p>
+    </div>
+
     <div><a href="/download">Baixar dados em csv</a></div>
     <div><input type="button" value = "Deletar" onclick="confirmDelete()"></div>
 

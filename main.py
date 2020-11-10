@@ -61,12 +61,16 @@ class Config(db.Model):
     lux_min = db.Column(db.Integer)
     time_on = db.Column(db.Integer)
     time_off = db.Column(db.Integer)
+    automatic_light = db.Column(db.Integer)
+    light_intensity = db.Column(db.Integer)
 
-    def __init__(self, lux_max, lux_min, time_on, time_off):
+    def __init__(self, lux_max, lux_min, time_on, time_off, automatic_light, light_intensity):
         self.lux_max = lux_max
         self.lux_min = lux_min
         self.time_on = time_on
         self.time_off = time_off
+        self.automatic_light = automatic_light
+        self.light_intensity = light_intensity
 
 
 # Loading web page for users
@@ -124,7 +128,9 @@ config_fields = {
     'lux_max': fields.Integer,
     'lux_min': fields.Integer,
     'time_on': fields.Integer,
-    'time_off': fields.Integer
+    'time_off': fields.Integer,
+    'automatic_light': fields.Integer,
+    'light_intensity': fields.Integer
 }
 
 # Restful API for sending and recieving measurements
@@ -168,7 +174,9 @@ class Config_data(Resource):
             lux_min = 50
             time_on = 20
             time_off = 20
-            new_config = Config(lux_max, lux_min, time_on, time_off)
+            automatic_light = 0
+            light_intensity = 0
+            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity)
             db.session.add(new_config)
             db.session.commit()
         result = Config.query.filter_by(id=1).first()
@@ -180,7 +188,9 @@ class Config_data(Resource):
             lux_min = 50
             time_on = 20 
             time_off = 20
-            new_config = Config(lux_max, lux_min, time_on, time_off)
+            automatic_light = 0
+            light_intensity = 0
+            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity)
             db.session.add(new_config)
             db.session.commit()
         else:
@@ -188,6 +198,8 @@ class Config_data(Resource):
             result.lux_min = request.json['lux_min']
             result.time_on = request.json['time_on']
             result.time_off = request.json['time_off']
+            result.automatic_light = request.json['automatic_light']
+            result.light_intensity = request.json['light_intensity']
             db.session.commit()
         return 201
 
@@ -197,5 +209,5 @@ api.add_resource(Config_data, '/config_elements')
 
 # Run Server
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host= '0.0.0.0')
+    #app.run(debug=True)
+    app.run(host= '0.0.0.0')
