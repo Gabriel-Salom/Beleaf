@@ -112,6 +112,13 @@ body {
     background: #4CAF50;
     cursor: pointer;
   }
+.on_off_switch{
+  padding-bottom: 10px;
+}
 
-  .on  { background:#4CAF50; }
-  .off { background:rgb(253, 82, 82); }
+.on  {
+  background:#4CAF50; 
+}
+.off {
+  background:rgb(250, 41, 41); 
+}
