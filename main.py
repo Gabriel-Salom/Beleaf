@@ -9,6 +9,7 @@ import csv
 import os
 import json
 import webbrowser
+import queue
 
 # Init app
 app = Flask(__name__)
@@ -24,6 +25,32 @@ db = SQLAlchemy(app)
 
 user_beleaf = 'beleaf_green'
 password_beleaf = 'beleaf_teste'
+
+class MessageAnnouncer:
+
+    def __init__(self):
+        self.listeners = []
+
+    def listen(self):
+        q = queue.Queue(maxsize=6)
+        self.listeners.append(q)
+        return q
+
+    def announce(self, msg):
+        for i in reversed(range(len(self.listeners))):
+            try:
+                self.listeners[i].put_nowait(msg)
+            except queue.Full:
+                del self.listeners[i]
+
+announcer = MessageAnnouncer()
+
+def format_sse(data: str, event: str) -> str:
+    msg = f'data: {data}\n\n'
+    if event is not None:
+        msg = f'event: {event}\n{msg}'
+    return msg
+
 
 def auth_required(f):
     @wraps(f)
@@ -80,6 +107,17 @@ def visualize_data():
     values = Measurement.query.all()
     return render_template('graph.html', title='data', values = values)
 
+@app.route('/listen', methods=['GET'])
+@auth_required
+def listen():
+    def stream():
+        messages = announcer.listen()  # returns a queue.Queue
+        while True:
+            msg = messages.get()  # blocks until a new message arrives
+            yield msg
+
+    return Response(stream(), mimetype='text/event-stream')
+
 # Generating csv from the database
 @auth_required
 @app.route('/download')
@@ -133,6 +171,13 @@ config_fields = {
     'light_intensity': fields.Integer
 }
 
+class Chart_data_id(Resource):
+    @auth_required
+    @marshal_with(measurement_fields)
+    def get(self, id):
+        result = Measurement.query.filter_by(id=id).first()
+        return result
+
 # Restful API for sending and recieving measurements
 class Chart_data(Resource):
     @auth_required
@@ -146,11 +191,29 @@ class Chart_data(Resource):
         date_string = now.strftime("%d/%m/%Y %H:%M:%S")
         request.json['date_posted'] = date_string
         date_posted = request.json['date_posted']
+        sse_date_posted = str(date_posted)
+        msg = format_sse(data=sse_date_posted, event = 'date_posted')
+        announcer.announce(msg=msg)
         humidity = request.json['humidity']
+        sse_humidity = str(humidity)
+        msg = format_sse(data=sse_humidity, event = 'humidity')
+        announcer.announce(msg=msg)
         light = request.json['light']
+        sse_light = str(light)
+        msg = format_sse(data=sse_light, event = 'light')
+        announcer.announce(msg=msg)
         temperature = request.json['temperature']
+        sse_temperature = str(temperature)
+        msg = format_sse(data=sse_temperature, event = 'temperature')
+        announcer.announce(msg=msg)
         ph = request.json['ph']
+        sse_ph = str(ph)
+        msg = format_sse(data=sse_ph, event = 'ph')
+        announcer.announce(msg=msg)
         conductivity = request.json['conductivity']
+        sse_conductivity = str(conductivity)
+        msg = format_sse(data=sse_conductivity, event = 'conductivity')
+        announcer.announce(msg=msg)
         new_measurement = Measurement(date_posted, humidity, light, temperature, ph, conductivity)
         db.session.add(new_measurement)
         db.session.commit()
@@ -205,9 +268,10 @@ class Config_data(Resource):
 
 api.add_resource(Chart_data, '/chart_data')
 api.add_resource(Config_data, '/config_elements')
+api.add_resource(Chart_data_id, '/chart_data_<int:id>')
 
 
 # Run Server
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host= '0.0.0.0')
+    app.run(debug=True)
+    #app.run(host= '0.0.0.0')
