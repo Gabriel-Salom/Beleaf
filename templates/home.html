@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class='alive-check'>
+    <span class="dot"></span>
+    <span class="alive-check-date" id="date"></span>
+</div>
+
+    <div class='gauge-container'>
+        <div class='gauge'>
+            <p>Umidade: <span id="humidity"></span>%</p>
+            <canvas id="humidity_gauge">
+            </canvas>
+        </div>
+        <div class='gauge'>
+            <p>Luz: <span id="light"></span> lux</p>
+            <canvas id="light_gauge">
+            </canvas>
+        </div>
+        <div class='gauge'>
+            <p>temperature: <span id="temperature"></span> C°</p>
+            <canvas id="temperature_gauge">
+            </canvas>
+        </div>
+        <div class='gauge'>
+            <p>ph: <span id="ph"></span></p>
+            <canvas id="ph_gauge">
+            </canvas>
+        </div>
+        <div class='gauge'>
+            <p>conductivity: <span id="conductivity"></span> S/m²/mole</p>
+            <canvas id="conductivity_gauge">
+            </canvas>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="static/colResizable-1.6.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='/js/bootstrap.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="/static/gauge.min.js"></script>
+    <script src="{{url_for('static', filename='home.js')}}"></script>
+{% endblock content %}

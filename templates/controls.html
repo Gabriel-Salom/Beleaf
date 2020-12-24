@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class='controls-cell'>
+    <div class='water-control'>
+        <h2>Bomba d'água</h2>
+        <input type="range" min="1" max="60" class="slider" id="time_on">
+        <p>Tempo desligado: <span id="time_on_output"></span> minutos</p>
+        <input type="range" min="1" max="60" class="slider" id="time_off">
+        <p>Tempo ligado: <span id="time_off_output"></span> minutos</p>
+    </div>
+
+    <div class='light-control'>
+        <h2>luminosidade</h2>
+        <input type="range" min="60" max="200" class="slider" id="lux_max">
+        <p>Luminosidade máxima: <span id="lux_max_output"></span> lux</p>
+        <input type="range" min="10" max="55" class="slider" id="lux_min">
+        <p>Luminosidade mínima: <span id="lux_min_output"></span> lux</p>
+    </div>
+    <div>  
+        <input type="range" min="0" max="100" class="slider" id="light_intensity">
+        <p>Intensidade do led: <span id="light_intensity_output"></span> %</p>
+    </div>
+    <div>  
+        <h2>Ciclo de luz</h2>
+        <div class="multi-range-container">
+            <input type="range" min="0" max="12" class="slider-timeon" id="lighton-schedule">
+            <input type="range" min="12" max="24" class="slider-timeoff" id="lightoff-schedule">
+        </div>
+        <p>Ligar as <span id="lighton_schedule_output"></span>h </p>
+        <p>Desligar as <span id="lightoff_schedule_output"></span>h </p>
+    </div>
+
+    <div class="on_off_switch">
+        <input type="button" id="automatic_light_output" onclick="toggleState(this)">
+    </div>      
+
+    <div><a href="/download">Baixar dados em csv</a></div>
+    <div><input type="button" value = "Deletar" onclick="confirmDelete()"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="static/colResizable-1.6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="{{ url_for('static', filename='/js/bootstrap.min.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="{{url_for('static', filename='controls.js')}}"></script>
+
+{% endblock content %}

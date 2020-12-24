@@ -9,13 +9,15 @@ import csv
 import os
 import json
 import webbrowser
-import queue
+import pytz
+from flask_apscheduler import APScheduler
 
 # Init app
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 # Init restful api
 api = Api(app)
+scheduler = APScheduler()
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -25,32 +27,6 @@ db = SQLAlchemy(app)
 
 user_beleaf = 'beleaf_green'
 password_beleaf = 'beleaf_teste'
-
-class MessageAnnouncer:
-
-    def __init__(self):
-        self.listeners = []
-
-    def listen(self):
-        q = queue.Queue(maxsize=6)
-        self.listeners.append(q)
-        return q
-
-    def announce(self, msg):
-        for i in reversed(range(len(self.listeners))):
-            try:
-                self.listeners[i].put_nowait(msg)
-            except queue.Full:
-                del self.listeners[i]
-
-announcer = MessageAnnouncer()
-
-def format_sse(data: str, event: str) -> str:
-    msg = f'data: {data}\n\n'
-    if event is not None:
-        msg = f'event: {event}\n{msg}'
-    return msg
-
 
 def auth_required(f):
     @wraps(f)
@@ -71,7 +47,6 @@ class Measurement(db.Model):
     temperature = db.Column(db.Float)
     ph = db.Column(db.Float)
     conductivity = db.Column(db.Float)
-
     
     def __init__(self, date_posted, humidity, light, temperature, ph, conductivity):
         self.date_posted = date_posted
@@ -90,33 +65,68 @@ class Config(db.Model):
     time_off = db.Column(db.Integer)
     automatic_light = db.Column(db.Integer)
     light_intensity = db.Column(db.Integer)
+    lighton_schedule = db.Column(db.Integer)
+    lightoff_schedule = db.Column(db.Integer)
 
-    def __init__(self, lux_max, lux_min, time_on, time_off, automatic_light, light_intensity):
+    def __init__(self, lux_max, lux_min, time_on, time_off, automatic_light, light_intensity, lighton_schedule, lightoff_schedule):
         self.lux_max = lux_max
         self.lux_min = lux_min
         self.time_on = time_on
         self.time_off = time_off
         self.automatic_light = automatic_light
         self.light_intensity = light_intensity
+        self.lighton_schedule = lighton_schedule
+        self.lightoff_schedule = lightoff_schedule
+
+class LastIntensity(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    last_intensity = db.Column(db.Integer)
+
+    def __init__(self, last_intensity):
+        self.last_intensity = last_intensity
 
 
-# Loading web page for users
+# Landing page
 @app.route("/")
 @auth_required
-def visualize_data():
-    values = Measurement.query.all()
-    return render_template('graph.html', title='data', values = values)
+def home():
+    return render_template('home.html')
 
-@app.route('/listen', methods=['GET'])
+# Detailed graph humidity
+@app.route("/graph-h")
 @auth_required
-def listen():
-    def stream():
-        messages = announcer.listen()  # returns a queue.Queue
-        while True:
-            msg = messages.get()  # blocks until a new message arrives
-            yield msg
+def graph_h():
+    return render_template('graph-h.html')
 
-    return Response(stream(), mimetype='text/event-stream')
+# Detailed graph temperature
+@app.route("/graph-t")
+@auth_required
+def graph_t():
+    return render_template('graph-t.html')
+
+# Detailed graph ph
+@app.route("/graph-p")
+@auth_required
+def graph_p():
+    return render_template('graph-p.html')
+
+# Detailed graph conductivity
+@app.route("/graph-c")
+@auth_required
+def graph_c():
+    return render_template('graph-c.html')
+
+# Detailed graph light
+@app.route("/graph-l")
+@auth_required
+def graph_l():
+    return render_template('graph-l.html')
+
+# Controls
+@app.route("/controls")
+@auth_required
+def controls():
+    return render_template('controls.html')
 
 # Generating csv from the database
 @auth_required
@@ -129,7 +139,14 @@ def csv_data():
         yield data.getvalue()
         data.seek(0)
         data.truncate(0)
-
+        w.writerow((
+                'date_posted',
+                'humidity',
+                'light',
+                'temperature',
+                'ph',
+                'conductivity'
+            ))
         # write each log item
         for item in values:
             w.writerow((
@@ -168,52 +185,36 @@ config_fields = {
     'time_on': fields.Integer,
     'time_off': fields.Integer,
     'automatic_light': fields.Integer,
-    'light_intensity': fields.Integer
+    'light_intensity': fields.Integer,
+    'lighton_schedule': fields.Integer,
+    'lightoff_schedule': fields.Integer
 }
 
-class Chart_data_id(Resource):
-    @auth_required
-    @marshal_with(measurement_fields)
-    def get(self, id):
-        result = Measurement.query.filter_by(id=id).first()
-        return result
+last_field = {
+    'id': fields.Integer,
+    'last_intensity': fields.Integer
+}
 
 # Restful API for sending and recieving measurements
 class Chart_data(Resource):
     @auth_required
     @marshal_with(measurement_fields)
     def get(self):
-        result = Measurement.query.all()
+        #result = Measurement.query.all()
+        result = Measurement.query.order_by(Measurement.id.desc()).limit(50).all()
         return result
 
     def post(self):
-        now = datetime.now()
+        tz = pytz.timezone('Brazil/East')
+        now = datetime.now(tz)
         date_string = now.strftime("%d/%m/%Y %H:%M:%S")
         request.json['date_posted'] = date_string
         date_posted = request.json['date_posted']
-        sse_date_posted = str(date_posted)
-        msg = format_sse(data=sse_date_posted, event = 'date_posted')
-        announcer.announce(msg=msg)
         humidity = request.json['humidity']
-        sse_humidity = str(humidity)
-        msg = format_sse(data=sse_humidity, event = 'humidity')
-        announcer.announce(msg=msg)
         light = request.json['light']
-        sse_light = str(light)
-        msg = format_sse(data=sse_light, event = 'light')
-        announcer.announce(msg=msg)
         temperature = request.json['temperature']
-        sse_temperature = str(temperature)
-        msg = format_sse(data=sse_temperature, event = 'temperature')
-        announcer.announce(msg=msg)
         ph = request.json['ph']
-        sse_ph = str(ph)
-        msg = format_sse(data=sse_ph, event = 'ph')
-        announcer.announce(msg=msg)
         conductivity = request.json['conductivity']
-        sse_conductivity = str(conductivity)
-        msg = format_sse(data=sse_conductivity, event = 'conductivity')
-        announcer.announce(msg=msg)
         new_measurement = Measurement(date_posted, humidity, light, temperature, ph, conductivity)
         db.session.add(new_measurement)
         db.session.commit()
@@ -235,11 +236,13 @@ class Config_data(Resource):
         if result == None:
             lux_max = 60
             lux_min = 50
-            time_on = 20
-            time_off = 20
+            time_on = 120
+            time_off = 1800
             automatic_light = 0
-            light_intensity = 0
-            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity)
+            light_intensity = 10
+            lighton_schedule = 6
+            lightoff_schedule = 18
+            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity, lighton_schedule, lightoff_schedule)
             db.session.add(new_config)
             db.session.commit()
         result = Config.query.filter_by(id=1).first()
@@ -249,11 +252,13 @@ class Config_data(Resource):
         if result == None:
             lux_max = 60
             lux_min = 50
-            time_on = 20 
-            time_off = 20
+            time_on = 120 
+            time_off = 1800
             automatic_light = 0
-            light_intensity = 0
-            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity)
+            light_intensity = 10
+            lighton_schedule = 6
+            lightoff_schedule = 18
+            new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity, lighton_schedule, lightoff_schedule)
             db.session.add(new_config)
             db.session.commit()
         else:
@@ -263,15 +268,80 @@ class Config_data(Resource):
             result.time_off = request.json['time_off']
             result.automatic_light = request.json['automatic_light']
             result.light_intensity = request.json['light_intensity']
+            result.lighton_schedule = request.json['lighton_schedule']
+            result.lightoff_schedule = request.json['lightoff_schedule']
             db.session.commit()
         return 201
 
+class Last_value(Resource):
+    @auth_required
+    @marshal_with(last_field)
+    def get(self):
+        result = LastIntensity.query.filter_by(id=1).first()
+        if result == None:
+            last_intensity = 10
+            new_last_intensity = LastIntensity(last_intensity)
+            db.session.add(new_last_intensity)
+            db.session.commit()
+        result = LastIntensity.query.filter_by(id=1).first()
+        return result
+
+    def post(self):
+        result = LastIntensity.query.filter_by(id=1).first()
+        if result == None:
+            last_intensity = 10
+            new_last_intensity = LastIntensity(last_intensity)
+            db.session.add(new_last_intensity)
+            db.session.commit()
+        else:
+            result.last_intensity = request.json['last_intensity']
+            db.session.commit()
+        return 201
+
+
 api.add_resource(Chart_data, '/chart_data')
 api.add_resource(Config_data, '/config_elements')
-api.add_resource(Chart_data_id, '/chart_data_<int:id>')
+api.add_resource(Last_value, '/last_value')
+
+#----------------------------------------------------
+#---- Gambiarra mais nojenta de todos os tempos
+def print_date_time():
+    result = Config.query.filter_by(id=1).first()
+    if result == None:
+        lux_max = 60
+        lux_min = 50
+        time_on = 120 
+        time_off = 1800
+        automatic_light = 0
+        light_intensity = 10
+        lighton_schedule = 6
+        lightoff_schedule = 18
+        new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity, lighton_schedule, lightoff_schedule)
+        db.session.add(new_config)
+        db.session.commit()
+    last_result = LastIntensity.query.filter_by(id=1).first()
+    if last_result == None:
+        last_intensity = 10
+        new_last_intensity = LastIntensity(last_intensity)
+        db.session.add(new_last_intensity)
+        db.session.commit()
+        last_result = LastIntensity.query.filter_by(id=1).first()
+    tz = pytz.timezone('Brazil/East')
+    now = datetime.now(tz)
+    hour_string = now.strftime("%H")
+    if result.lighton_schedule <= int(hour_string) and  result.lightoff_schedule > int(hour_string):
+        result.light_intensity = last_result.last_intensity
+        db.session.commit()
+        #print("Ligado. \n Valor armazenado de intensidade: %s \n Valor de intensidade: %s \n" %(last_result.last_intensity, result.light_intensity))
+    else:
+        result.light_intensity = 0
+        db.session.commit()
+        #print("Desligado. \n Valor armazenado de intensidade: %s \n Valor de intensidade: %s \n" %(last_result.last_intensity, result.light_intensity))
 
 
 # Run Server
 if __name__ == '__main__':
+    scheduler.add_job(id = 'schedule task', func = print_date_time, trigger = 'interval', minutes = 10)
+    scheduler.start()
     app.run(debug=True)
     #app.run(host= '0.0.0.0')

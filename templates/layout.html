@@ -3,20 +3,72 @@
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="shortcut icon" href="#" />
+    <meta name="viewport" content="height=device-height, width=device-width, initial-scale=1, shrink-to-fit=no, minimum-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='profile_pics/beleaf.jpg') }}" />
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" integrity="sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp" crossorigin="anonymous">
 
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 
-    {% if title %}
-        <title>Beleaf - {{ title }}</title>
-    {% else %}
-        <title>Beleaf Blog</title>
-    {% endif %}
 </head>
+
+<body>
+  <nav class='navbar'>
+    <ul class='navbar-nav'>
+      <a href="{{ url_for('home') }}">
+        <img class="logo" src="{{ url_for('static', filename='profile_pics/beleaf.jpg') }}">
+      </a>
+      <li class='nav-item'>
+        <a href="{{ url_for('graph_h') }}" class='nav-link'>
+          <i class="fas fa-wind"></i>
+          <span class= 'link-text'>Humidity</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a href="{{ url_for('graph_t') }}" class='nav-link'>
+          <i class="fas fa-temperature-low"></i>
+          <span class= 'link-text'>Temperature</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a href="{{ url_for('graph_p') }}" class='nav-link'>
+          <i class="fas fa-water"></i>
+          <span class= 'link-text'>Ph</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a href="{{ url_for('graph_c') }}" class='nav-link'>
+          <i class="fas fa-flask"></i>
+          <span class= 'link-text'>Conductivity</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a href="{{ url_for('graph_l') }}" class='nav-link'>
+          <i class="far fa-sun"></i>
+          <span class= 'link-text'>Luz</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+      <li class='nav-item'>
+        <a href="{{ url_for('controls') }}" class='nav-link'>
+          <i class="fas fa-cog"></i>
+          <span class= 'link-text'>Controles</span>
+          <!-- <img height="24" viewBox="0 0 24 24" width="24" class="humidity-icon" src="{{ url_for('static', filename='icons/humidity.svg') }}"> -->
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <main>
+</main>
+</body>
+
+<!--
 <body>
     <header class="site-header">
       <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
@@ -26,35 +78,9 @@
         </div>
       </nav>
     </header>
+-->
 
-    <main role="main" class="container">
-      <div class="row">
-          
-        <div class="col-md-8">
-          {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-              {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endwith %}
-          {% block content %}{% endblock %}
-        </div>
-               
-      </div>
-    </main>
+    {% block content %}{% endblock %}
 
-
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="/static/gauge.min.js"></script>
-    <script src="{{url_for('static', filename='graph.js')}}"></script>
 </body>
 </html>

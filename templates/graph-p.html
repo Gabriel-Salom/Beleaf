@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+    <div class='chart-container'>
+        <canvas id="ph_chart"></canvas>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="static/colResizable-1.6.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="{{ url_for('static', filename='/js/bootstrap.min.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="{{url_for('static', filename='graph-p.js')}}"></script>
+
+{% endblock content %}
