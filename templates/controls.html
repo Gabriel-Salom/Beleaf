@@ -15,30 +15,30 @@
         <p>Luminosidade máxima: <span id="lux_max_output"></span> lux</p>
         <input type="range" min="10" max="55" class="slider" id="lux_min">
         <p>Luminosidade mínima: <span id="lux_min_output"></span> lux</p>
-    </div>
-    <div>  
         <input type="range" min="0" max="100" class="slider" id="light_intensity">
         <p>Intensidade do led: <span id="light_intensity_output"></span> %</p>
+        <div class="on_off_switch">
+            <p>Controle de intensidade automático</p>
+            <input type="button" id="automatic_light_output" onclick="toggleState(this)">
+        </div>      
     </div>
-    <div>  
+    <div class='lightcycle-control'>  
         <h2>Ciclo de luz</h2>
         <div class="multi-range-container">
             <input type="range" min="0" max="12" class="slider-timeon" id="lighton-schedule">
             <input type="range" min="12" max="24" class="slider-timeoff" id="lightoff-schedule">
         </div>
-        <p>Ligar as <span id="lighton_schedule_output"></span>h </p>
-        <p>Desligar as <span id="lightoff_schedule_output"></span>h </p>
+        <div class="lightcycle-text">
+            <p>Ligar as <span id="lighton_schedule_output"></span>h </p>
+            <p>Desligar as <span id="lightoff_schedule_output"></span>h </p>
+        </div>
     </div>
 
-    <div class="on_off_switch">
-        <input type="button" id="automatic_light_output" onclick="toggleState(this)">
-    </div>      
-
     <div><a href="/download">Baixar dados em csv</a></div>
-    <div><input type="button" value = "Deletar" onclick="confirmDelete()"></div>
+    <div><input type="button" value = "Deletar dados" class="delete_button" onclick="confirmDelete()"></div>
 </div>
 
-<script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="static/colResizable-1.6.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="{{ url_for('static', filename='/js/bootstrap.min.js') }}"></script>

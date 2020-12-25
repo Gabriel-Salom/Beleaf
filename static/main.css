@@ -16,119 +16,321 @@ main {
   margin-left: 5rem;
   padding: 1rem;
 }
-.logo {
-  padding: 1rem;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  transform: rotateY(0deg);
-  transition: var(--transition-speed);
-}
-
-.navbar:hover .logo {
-  transform: rotateY(180deg);
-}
-
-.navbar {
-  width: 5rem;
-  height: 100vh;
-  position: fixed;
-  background-color: #428560;
-  transition: width 500ms ease;
-}
-
-.navbar-nav {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 100%;
-}
-.nav-item {
-  width: 100%;
-}
-
-.nav-item:last-child {
-  margin-top: auto;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  height: 5rem;
-  text-decoration: none;
-  filter: grayscale(100%) opacity(0.7);
-  transition: var(--transition-speed);
-}
-
-.nav-link:hover {
-  filter: grayscale(0%) opacity(1);
-  background: #6edda0;
-}
-
-.link-text {
-  display: none;
-  margin-left: 1rem;
-  color: azure;
-}
-
-.nav-link i {
-  width: 2rem;
-  min-width: 2rem;
-  margin: 0 1.5rem;
-}
-
-.navbar:hover {
-  width: 16rem;
-}
-
-.navbar:hover .link-text {
-  display: block;
-}
-
-.fas {
-  color: rgb(209, 252, 252);
-}
-
-.fas:hover {
-  color: rgb(255, 255, 255);
-}
-
-.far {
-  color: rgb(209, 252, 252);
-}
-
-.far:hover {
-  color: rgb(255, 255, 255);
-}
-
 /* small screens  */
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 800px) {
+  .logo {
+    padding: 1rem;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    transform: rotateY(0deg);
+  }
   .navbar {
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
     position: fixed;
-    top: 0px;
-    left: 0px;
-    height: 100%;
+    top: 0;
+    width: 100vw;
+    height: 5rem;
+    background-color: #428560;
+    transition: width 500ms ease;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+  }
+
+  .navbar:hover {
+    width: 100vw;
+  }
+
+  .navbar-nav {
+    flex-grow: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    flex-flow: wrap;
+  }
+
+  body {
+    margin: 0;
+    height: 0;
   }
   main {
     margin: 0;
   }
+
+  .nav-link {
+    text-decoration: none;
+    filter: grayscale(100%) opacity(0.7);
+    transition: var(--transition-speed);
+  }
+
+  .nav-link i {
+    flex-grow: 1;
+    height: fit-content;
+    width: fit-content;
+    min-width: 0.1rem;
+  }
+
+  .link-text {
+    display: none;
+    margin-left: 1rem;
+    color: azure;
+  }
+
+  .navbar:hover .link-text {
+    display: none;
+  }
+
+  .dot {
+    height: 20px;
+    width: 20px;
+    background-color: rgb(34, 214, 49);
+    border: 1px solid rgb(19, 48, 19);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .alive-check {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+  }
+
+  .nav-link:hover {
+    filter: grayscale(0%) opacity(1);
+    background: #6edda0;
+  }
+
+  .link-text {
+    display: none;
+    margin-left: 1rem;
+    color: azure;
+  }
+
+  .fas {
+    color: rgb(209, 252, 252);
+  }
+
+  .fas:hover {
+    color: rgb(255, 255, 255);
+  }
+
+  .far {
+    color: rgb(209, 252, 252);
+  }
+
+  .far:hover {
+    color: rgb(255, 255, 255);
+  }
+
+  .gauge-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-flow: wrap;
+    align-items: center;
+    position: absolute;
+    top: 15vh;
+    right: 10vh;
+    text-align: center;
+    max-width: 70%;
+    z-index: -1;
+  }
+  .chart-container {
+    position: absolute;
+    top: 15vh;
+    padding: 10px;
+    margin: 5px;
+    width: 95%;
+    z-index: -1;
+    border-radius: 10px;
+    border: 1px solid rgb(19, 48, 19);
+  }
+
+  .controls-cell {
+    position: absolute;
+    top: 15vh;
+    padding: 10px;
+    margin: 5px;
+    width: 95%;
+    text-align: center;
+    z-index: -1;
+  }
 }
 
-.gauge-container {
+/* Big screens  */
+@media only screen and (min-width: 800px) {
+  .logo {
+    padding: 1rem;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    transform: rotateY(0deg);
+    transition: var(--transition-speed);
+  }
+
+  .navbar:hover .logo {
+    transform: rotateY(180deg);
+  }
+
+  .navbar {
+    width: 5rem;
+    height: 100vh;
+    position: fixed;
+    background-color: #428560;
+    transition: width 500ms ease;
+  }
+
+  .navbar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+  }
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-item:last-child {
+    margin-top: auto;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    height: 5rem;
+    text-decoration: none;
+    filter: grayscale(100%) opacity(0.7);
+    transition: var(--transition-speed);
+  }
+
+  .nav-link:hover {
+    filter: grayscale(0%) opacity(1);
+    background: #6edda0;
+  }
+
+  .link-text {
+    display: none;
+    margin-left: 1rem;
+    color: azure;
+  }
+
+  .nav-link i {
+    width: 2rem;
+    min-width: 2rem;
+    margin: 0 1.5rem;
+  }
+
+  .navbar:hover {
+    width: 16rem;
+  }
+
+  .navbar:hover .link-text {
+    display: block;
+  }
+
+  .fas {
+    color: rgb(209, 252, 252);
+  }
+
+  .fas:hover {
+    color: rgb(255, 255, 255);
+  }
+
+  .far {
+    color: rgb(209, 252, 252);
+  }
+
+  .far:hover {
+    color: rgb(255, 255, 255);
+  }
+
+  .dot {
+    height: 20px;
+    width: 20px;
+    background-color: rgb(34, 214, 49);
+    border: 1px solid rgb(19, 48, 19);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .alive-check {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+  }
+  .gauge-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-flow: wrap;
+    align-items: center;
+    position: absolute;
+    top: 10vh;
+    right: 10vh;
+    text-align: center;
+    max-width: 70%;
+    z-index: -1;
+  }
+
+  .chart-container {
+    position: absolute;
+    right: 10px;
+    padding: 10px;
+    margin: 5px;
+    width: 80%;
+    z-index: -1;
+    border-radius: 10px;
+    border: 1px solid rgb(19, 48, 19);
+  }
+
+  .controls-cell {
+    position: absolute;
+    right: 2rem;
+    text-align: center;
+    width: 75%;
+    z-index: -1;
+  }
+}
+
+.water-control {
+  border: 1px solid rgb(19, 48, 19);
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.light-control {
+  border: 1px solid rgb(19, 48, 19);
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.lightcycle-control {
+  border: 1px solid rgb(19, 48, 19);
+  margin: 10px;
+  border-radius: 5px;
+}
+
+.lightcycle-text {
+  padding-bottom: 10px;
   display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  flex-flow: wrap;
-  align-items: center;
-  position: absolute;
-  top: 10vh;
-  right: 10vh;
-  text-align: center;
-  max-width: 70%;
-  z-index: -1;
+  flex-flow: row;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.lightcycle-text > * {
+  margin: 10px;
 }
 
 .gauge {
@@ -140,24 +342,6 @@ main {
   margin: 5px;
 }
 
-.controls-cell {
-  position: absolute;
-  right: 2rem;
-  text-align: center;
-  width: 75%;
-  z-index: -1;
-}
-
-.chart-container {
-  position: absolute;
-  right: 10px;
-  padding: 10px;
-  margin: 5px;
-  width: 80%;
-  z-index: -1;
-  border-radius: 10px;
-  border: 1px solid rgb(19, 48, 19);
-}
 .chart {
   width: 100%;
 }
@@ -169,7 +353,7 @@ main {
 
 .slider {
   -webkit-appearance: none;
-  width: 100%;
+  width: 90%;
   height: 15px;
   border-radius: 5px;
   background: #d3d3d3;
@@ -288,6 +472,14 @@ main {
 
 .on_off_switch {
   padding-bottom: 10px;
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.on_off_switch > * {
+  margin: 10px;
 }
 
 .on {
@@ -297,17 +489,6 @@ main {
   background: rgb(250, 41, 41);
 }
 
-.dot {
-  height: 20px;
-  width: 20px;
-  background-color: rgb(34, 214, 49);
-  border: 1px solid rgb(19, 48, 19);
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.alive-check {
-  position: fixed;
-  top: 10px;
-  right: 10px;
+.delete_button {
+  background: rgb(250, 41, 41);
 }
