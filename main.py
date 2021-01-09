@@ -10,14 +10,13 @@ import os
 import json
 import webbrowser
 import pytz
-from flask_apscheduler import APScheduler
+from werkzeug.utils import secure_filename
 
 # Init app
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 # Init restful api
 api = Api(app)
-scheduler = APScheduler()
 
 # Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
@@ -25,6 +24,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Init db
 db = SQLAlchemy(app)
 
+# App imgs
+app.config["IMAGE_UPLOADS"] = os.path.join(basedir, "static/live_image")
+app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF"]
+app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
+
+# Autorização
 user_beleaf = 'beleaf_green'
 password_beleaf = 'beleaf_teste'
 
@@ -127,6 +132,19 @@ def graph_l():
 @auth_required
 def controls():
     return render_template('controls.html')
+
+# Image
+@app.route("/image", methods=['GET', 'POST'])
+@auth_required
+def post_image():
+    if request.method == "POST":
+        uploaded_file = request.files['image']
+        filename = secure_filename(uploaded_file.filename)
+        if filename != '':
+            uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+            print(app.config["IMAGE_UPLOADS"])
+            return 'OK'
+
 
 # Generating csv from the database
 @auth_required
@@ -303,45 +321,8 @@ api.add_resource(Chart_data, '/chart_data')
 api.add_resource(Config_data, '/config_elements')
 api.add_resource(Last_value, '/last_value')
 
-#----------------------------------------------------
-#---- Gambiarra mais nojenta de todos os tempos
-def print_date_time():
-    result = Config.query.filter_by(id=1).first()
-    if result == None:
-        lux_max = 60
-        lux_min = 50
-        time_on = 120 
-        time_off = 1800
-        automatic_light = 0
-        light_intensity = 10
-        lighton_schedule = 6
-        lightoff_schedule = 18
-        new_config = Config(lux_max, lux_min, time_on, time_off, automatic_light, light_intensity, lighton_schedule, lightoff_schedule)
-        db.session.add(new_config)
-        db.session.commit()
-    last_result = LastIntensity.query.filter_by(id=1).first()
-    if last_result == None:
-        last_intensity = 10
-        new_last_intensity = LastIntensity(last_intensity)
-        db.session.add(new_last_intensity)
-        db.session.commit()
-        last_result = LastIntensity.query.filter_by(id=1).first()
-    tz = pytz.timezone('Brazil/East')
-    now = datetime.now(tz)
-    hour_string = now.strftime("%H")
-    if result.lighton_schedule <= int(hour_string) and  result.lightoff_schedule > int(hour_string):
-        result.light_intensity = last_result.last_intensity
-        db.session.commit()
-        #print("Ligado. \n Valor armazenado de intensidade: %s \n Valor de intensidade: %s \n" %(last_result.last_intensity, result.light_intensity))
-    else:
-        result.light_intensity = 0
-        db.session.commit()
-        #print("Desligado. \n Valor armazenado de intensidade: %s \n Valor de intensidade: %s \n" %(last_result.last_intensity, result.light_intensity))
-
 
 # Run Server
 if __name__ == '__main__':
-    scheduler.add_job(id = 'schedule task', func = print_date_time, trigger = 'interval', minutes = 10)
-    scheduler.start()
     app.run(debug=True)
     #app.run(host= '0.0.0.0')

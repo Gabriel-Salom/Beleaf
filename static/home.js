@@ -1,5 +1,9 @@
 const api_url_chart = '/chart_data';
 var last_date = 0;
+//==============================================================
+// Teste img
+var newImage = new Image();
+newImage.src = "static/live_image/image.jpg?t=" + new Date().getTime();
 
 //==============================================================
 // Gauges 
@@ -377,6 +381,7 @@ get_info()
 // Função para atualizar o gráfico a cada 31 segundos
 setInterval(get_info,31000);
 
+
 function get_info(){
     $.getJSON(api_url_chart, function(data) {
         // Gambiarra porque não da para implementar SSE no PythonAnywhere :(
@@ -403,4 +408,8 @@ function get_info(){
             conductivity.innerHTML = data[0].conductivity;   
             gaugeCond.set(data[0].conductivity);
     })
+
+    document.getElementById("image").src = newImage.src;
+    newImage = new Image();
+    newImage.src = "static/live_image/image.jpg?t=" + new Date().getTime();
 };
