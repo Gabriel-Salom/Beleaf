@@ -43,6 +43,14 @@ def auth_required(f):
         return make_response('Could not verify authentication!', 401, {'WWW-authenticate' : 'Basic realm="Login Required"'})
     return decorated
 
+def limit_images(limit):
+    list_of_images = os.listdir(app.config["IMAGE_UPLOADS"]) 
+    list_of_images_path = [app.config["IMAGE_UPLOADS"] + "/{0}".format(x) for x in list_of_images]
+    list_of_images_files = ["/{0}".format(x) for x in list_of_images]
+    if len(list_of_images) > limit:
+        oldest_file = min(list_of_images_path, key=os.path.getctime)
+        os.remove(oldest_file)
+
 # Classes/Models for the database
 class Measurement(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -134,16 +142,22 @@ def controls():
     return render_template('controls.html')
 
 # Image
-@app.route("/image", methods=['GET', 'POST'])
+@app.route("/image", methods=['POST', 'GET'])
 @auth_required
 def post_image():
+    # Essa função recebe como parametro quantas imagens podem ser armazenadas na pasta. dado esse limite, ela deletará o arquivo mais antigo
+    limit_images(60)
     if request.method == "POST":
         uploaded_file = request.files['image']
-        filename = secure_filename(uploaded_file.filename)
-        if filename != '':
-            uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
-            print(app.config["IMAGE_UPLOADS"])
-            return 'OK'
+        tz = pytz.timezone('Brazil/East')
+        now = datetime.now(tz)
+        filename = now.strftime("%d_%m_%Y %H=%M=%S") + '.jpg'
+        uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+        return 'OK'
+    if request.method == 'GET':
+        list_of_images = os.listdir(app.config["IMAGE_UPLOADS"])
+        list_of_images_files = ["/{0}".format(x) for x in list_of_images] 
+        return jsonify(list_of_images_files)
 
 
 # Generating csv from the database
@@ -324,5 +338,5 @@ api.add_resource(Last_value, '/last_value')
 
 # Run Server
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host= '0.0.0.0')
+    #app.run(debug=True)
+    app.run(host= '0.0.0.0')

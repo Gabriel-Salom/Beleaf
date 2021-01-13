@@ -1,9 +1,11 @@
 const api_url_chart = '/chart_data';
+const api_url_image = '/image';
 var last_date = 0;
 //==============================================================
 // Teste img
-var newImage = new Image();
-newImage.src = "static/live_image/image.jpg?t=" + new Date().getTime();
+var image_path = [];
+var slideShow = document.getElementById("slideshow");
+var picturesDateOutput = document.getElementById("pictures_date_output");
 
 //==============================================================
 // Gauges 
@@ -378,6 +380,20 @@ var dot = document.getElementsByClassName('dot')[0];
 
 get_info()
 
+//Função para atualizar os valores do slider
+function updateImage(image_path){
+    //Atualiza a imagem para a mais recente
+    newImage = new Image();
+    newImage.src = 'static/live_image' + image_path[image_path.length-1];
+    document.getElementById("image").src = newImage.src;
+    //Atualiza o label para o mais recente
+    var image_label = (image_path[image_path.length-1]).substring(0,(image_path[image_path.length-1]).length-4);
+    image_label = image_label.substring(1)
+    image_label = image_label.replace(/_/g, "/")
+    image_label = image_label.replace(/=/g, ":")
+    picturesDateOutput.innerHTML = image_label;
+};
+
 // Função para atualizar o gráfico a cada 31 segundos
 setInterval(get_info,31000);
 
@@ -408,8 +424,29 @@ function get_info(){
             conductivity.innerHTML = data[0].conductivity;   
             gaugeCond.set(data[0].conductivity);
     })
-
-    document.getElementById("image").src = newImage.src;
-    newImage = new Image();
-    newImage.src = "static/live_image/image.jpg?t=" + new Date().getTime();
+    $.getJSON(api_url_image, function(data) {
+      image_path = [];
+      for(var i = 0; i < data.length; i++) {
+        image_path.push(data[i]);
+      }
+      // Recebeu novas imagens, atualiza os valores da barra slider
+      slideShow.min = 0;
+      slideShow.max = image_path.length-1;
+      slideShow.value = image_path.length-1;
+      // Chama a função para atualizar as imagens e os labels
+      updateImage(image_path);
+  })
 };
+
+slideShow.oninput = function() {
+  //Atualiza a imagem para a imagem que o usuário quer
+  newImage = new Image();
+  newImage.src = 'static/live_image' + image_path[this.value];
+  document.getElementById("image").src = newImage.src;
+  //Atualiza o label compativel com a imagem
+  var image_label = (image_path[this.value]).substring(0,(image_path[this.value]).length-4);
+  image_label = image_label.substring(1)
+  image_label = image_label.replace(/_/g, "/")
+  image_label = image_label.replace(/=/g, ":")
+  picturesDateOutput.innerHTML = image_label;
+}

@@ -41,7 +41,7 @@ while True:
 
     time.sleep(3600) #Dorme por 1h
     elapsedTime = time.time() -start
+    print(elapsedTime)
     if (elapsedTime > 82800):  #Desliga o código quando passaram 23h
         print(str(elapsedTime) + ' quitando')
         break
-
