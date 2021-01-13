@@ -11,6 +11,7 @@ import json
 import webbrowser
 import pytz
 from werkzeug.utils import secure_filename
+import glob
 
 # Init app
 app = Flask(__name__)
@@ -147,6 +148,7 @@ def controls():
 def post_image():
     # Essa função recebe como parametro quantas imagens podem ser armazenadas na pasta. dado esse limite, ela deletará o arquivo mais antigo
     limit_images(60)
+    list_of_images_files = []
     if request.method == "POST":
         uploaded_file = request.files['image']
         tz = pytz.timezone('Brazil/East')
@@ -154,9 +156,15 @@ def post_image():
         filename = now.strftime("%d_%m_%Y %H=%M=%S") + '.jpg'
         uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
         return 'OK'
+
     if request.method == 'GET':
-        list_of_images = os.listdir(app.config["IMAGE_UPLOADS"])
-        list_of_images_files = ["/{0}".format(x) for x in list_of_images] 
+        #Cria uma lista com todos os files organizados por data
+        full_files = glob.glob(app.config["IMAGE_UPLOADS"] + '/*')
+        full_files.sort(key=os.path.getmtime)
+        #Para cada arquivo, remove o path e envia somente o nome do arquivo
+        for x in full_files:
+            files = os.path.basename(x)
+            list_of_images_files.append("/{0}".format(files))
         return jsonify(list_of_images_files)
 
 
@@ -338,5 +346,5 @@ api.add_resource(Last_value, '/last_value')
 
 # Run Server
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host= '0.0.0.0')
+    app.run(debug=True)
+    #app.run(host= '0.0.0.0')

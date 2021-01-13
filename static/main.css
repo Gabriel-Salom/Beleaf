@@ -170,6 +170,10 @@ main {
 
 /* Big screens  */
 @media only screen and (min-width: 800px) {
+  .live-img {
+    max-width: 50vw;
+  }
+
   .logo {
     padding: 1rem;
     width: 5rem;
