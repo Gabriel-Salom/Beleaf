@@ -34,6 +34,16 @@
         </div>
     </div>
 
+    <div class='pic-control'>  
+        <h2>Frequência de fotos</h2>
+        <div class="multi-range-container">
+            <input type="range" min="0" max="1440" class="slider" id="freq_pic">
+        </div>
+        <div class="pic-text">
+            <p>Uma foto a cada <span id="freq_pic_output"></span> minutos </p>
+        </div>
+    </div>
+
     <div><a href="/download">Baixar dados em csv</a></div>
     <div><input type="button" value = "Deletar dados" class="delete_button" onclick="confirmDelete()"></div>
 </div>

@@ -1,6 +1,7 @@
 from datetime import datetime
-from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response, send_file
+from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response, send_file, session
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
+from authlib.integrations.flask_client import OAuth
 from werkzeug.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
@@ -16,6 +17,9 @@ import glob
 # Init app
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
+# App sessions
+app.secret_key = 'jamiley'
+
 # Init restful api
 api = Api(app)
 
@@ -33,6 +37,13 @@ app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 # Autorização
 user_beleaf = 'beleaf_green'
 password_beleaf = 'beleaf_teste'
+
+@app.cli.command('initdb')
+def reset_db():
+    #drops and creates fresh database
+    db.drop_all()
+    db.create_all()
+    print('Initialized default DB')
 
 def auth_required(f):
     @wraps(f)
@@ -99,64 +110,57 @@ class LastIntensity(db.Model):
     def __init__(self, last_intensity):
         self.last_intensity = last_intensity
 
+class PicFreq(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    picFreq = db.Column(db.Integer)
 
-# Landing page
+    def __init__(self, picFreq):
+        self.picFreq = picFreq
+
+
+
+
+# Detailed graph humidity
 @app.route("/")
-@auth_required
 def home():
     return render_template('home.html')
 
 # Detailed graph humidity
 @app.route("/graph-h")
-@auth_required
 def graph_h():
     return render_template('graph-h.html')
 
 # Detailed graph temperature
 @app.route("/graph-t")
-@auth_required
 def graph_t():
     return render_template('graph-t.html')
 
 # Detailed graph ph
 @app.route("/graph-p")
-@auth_required
 def graph_p():
     return render_template('graph-p.html')
 
 # Detailed graph conductivity
 @app.route("/graph-c")
-@auth_required
 def graph_c():
     return render_template('graph-c.html')
 
 # Detailed graph light
 @app.route("/graph-l")
-@auth_required
 def graph_l():
     return render_template('graph-l.html')
 
 # Controls
 @app.route("/controls")
-@auth_required
 def controls():
     return render_template('controls.html')
 
-# Image
-@app.route("/image", methods=['POST', 'GET'])
-@auth_required
-def post_image():
+# Get Image
+@app.route("/get_image", methods=['GET'])
+def get_image():
     # Essa função recebe como parametro quantas imagens podem ser armazenadas na pasta. dado esse limite, ela deletará o arquivo mais antigo
     limit_images(60)
     list_of_images_files = []
-    if request.method == "POST":
-        uploaded_file = request.files['image']
-        tz = pytz.timezone('Brazil/East')
-        now = datetime.now(tz)
-        filename = now.strftime("%d_%m_%Y %H=%M=%S") + '.jpg'
-        uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
-        return 'OK'
-
     if request.method == 'GET':
         #Cria uma lista com todos os files organizados por data
         full_files = glob.glob(app.config["IMAGE_UPLOADS"] + '/*')
@@ -167,6 +171,21 @@ def post_image():
             list_of_images_files.append("/{0}".format(files))
         return jsonify(list_of_images_files)
 
+
+# Post Image
+@app.route("/image", methods=['POST'])
+@auth_required
+def post_image():   
+    # Essa função recebe como parametro quantas imagens podem ser armazenadas na pasta. dado esse limite, ela deletará o arquivo mais antigo
+    limit_images(60)
+    list_of_images_files = []
+    if request.method == "POST":
+        uploaded_file = request.files['image']
+        tz = pytz.timezone('Brazil/East')
+        now = datetime.now(tz)
+        filename = now.strftime("%d_%m_%Y %H=%M=%S") + '.jpg'
+        uploaded_file.save(os.path.join(app.config["IMAGE_UPLOADS"], filename))
+        return 'OK'
 
 # Generating csv from the database
 @auth_required
@@ -235,15 +254,22 @@ last_field = {
     'last_intensity': fields.Integer
 }
 
+pic_freq_field = {
+    'id': fields.Integer,
+    'picFreq': fields.Integer
+}
+
 # Restful API for sending and recieving measurements
-class Chart_data(Resource):
-    @auth_required
+class Get_data(Resource):
     @marshal_with(measurement_fields)
     def get(self):
         #result = Measurement.query.all()
         result = Measurement.query.order_by(Measurement.id.desc()).limit(50).all()
         return result
 
+class Chart_data(Resource):
+    @auth_required
+    @marshal_with(measurement_fields)
     def post(self):
         tz = pytz.timezone('Brazil/East')
         now = datetime.now(tz)
@@ -269,7 +295,6 @@ class Chart_data(Resource):
 
 # Restful API for sending and recieving configurations
 class Config_data(Resource):
-    @auth_required
     @marshal_with(config_fields)
     def get(self): 
         result = Config.query.filter_by(id=1).first()
@@ -287,6 +312,10 @@ class Config_data(Resource):
             db.session.commit()
         result = Config.query.filter_by(id=1).first()
         return result
+
+class Change_config_data(Resource):
+    @auth_required
+    @marshal_with(config_fields)    
     def post(self):
         result = Config.query.filter_by(id=1).first()
         if result == None:
@@ -314,7 +343,6 @@ class Config_data(Resource):
         return 201
 
 class Last_value(Resource):
-    @auth_required
     @marshal_with(last_field)
     def get(self):
         result = LastIntensity.query.filter_by(id=1).first()
@@ -326,6 +354,9 @@ class Last_value(Resource):
         result = LastIntensity.query.filter_by(id=1).first()
         return result
 
+class Change_last_value(Resource):
+    @auth_required
+    @marshal_with(last_field)
     def post(self):
         result = LastIntensity.query.filter_by(id=1).first()
         if result == None:
@@ -338,10 +369,45 @@ class Last_value(Resource):
             db.session.commit()
         return 201
 
+class Get_Pic_Freq(Resource):
+    @marshal_with(pic_freq_field)
+    def get(self):
+        result = PicFreq.query.filter_by(id=1).first()
+        if result == None:
+            pic_freq = 1440
+            new_pic_freq = PicFreq(pic_freq)
+            db.session.add(new_pic_freq)
+            db.session.commit()
+        result = PicFreq.query.filter_by(id=1).first()
+        return result
 
+class Post_Pic_Freq(Resource):
+    @auth_required
+    @marshal_with(pic_freq_field)
+    def post(self):
+        result = PicFreq.query.filter_by(id=1).first()
+        if result == None:
+            pic_freq = 1440
+            new_pic_freq = PicFreq(pic_freq)
+            db.session.add(new_pic_freq)
+            db.session.commit()
+        else:
+            result.picFreq = request.json['picFreq']
+            db.session.commit()
+        return 201
+
+
+api.add_resource(Get_data, '/get_chart_data')
 api.add_resource(Chart_data, '/chart_data')
+
 api.add_resource(Config_data, '/config_elements')
+api.add_resource(Change_config_data, '/change_config_elements')
+
 api.add_resource(Last_value, '/last_value')
+api.add_resource(Change_last_value, '/change_last_value')
+
+api.add_resource(Get_Pic_Freq, '/get_pic_freq')
+api.add_resource(Post_Pic_Freq, '/post_pic_freq')
 
 
 # Run Server

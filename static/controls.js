@@ -1,6 +1,11 @@
 const api_url_config = '/config_elements';
+const api_url_change_config = '/change_config_elements';
 
 const api_url_last_value = '/last_value';
+const api_url_change_last_value = '/change_last_value';
+
+const api_url_get_pic_freq = '/get_pic_freq';
+const api_url_post_pic_freq = '/post_pic_freq';
 
 // =========================================================
 // Pegando informações do server
@@ -36,6 +41,11 @@ function config_info(){
     $.getJSON(api_url_last_value, function(data) {
         light_intensity_output.innerHTML = data.last_intensity;
         light_intensity.value = data.last_intensity;
+    })
+
+    $.getJSON(api_url_get_pic_freq, function(data) {
+        picFreqOutput.innerHTML = data.picFreq;
+        picFreq.value = data.picFreq;
     })
 };
 
@@ -105,6 +115,16 @@ lightOffSchedule.oninput = function() {
 }
 
 // =========================================================
+//Freq de fotos
+var picFreq = document.getElementById("freq_pic");
+var picFreqOutput = document.getElementById("freq_pic_output");
+
+picFreq.oninput = function() {
+    picFreqOutput.innerHTML = this.value;
+}
+
+
+// =========================================================
 //Botão ligar/desligar
 
 function toggleState(item){
@@ -137,7 +157,7 @@ function GenerateJSON()
 
       $.ajax({
         type: "POST",
-        url: "/config_elements",
+        url: api_url_change_config,
         contentType: 'application/json',
         data: JSON.stringify(jsonData),
         dataType: 'json',
@@ -151,9 +171,23 @@ function GenerateJSON()
 
         $.ajax({
             type: "POST",
-            url: "/last_value",
+            url: api_url_change_last_value,
             contentType: 'application/json',
             data: JSON.stringify(jsonlast),
+            dataType: 'json',
+            success: function() {
+                //console.log(data);
+            }
+            });
+
+    var jsonFreq = {}
+    jsonFreq['picFreq'] = parseInt(picFreq.value);
+
+        $.ajax({
+            type: "POST",
+            url: api_url_post_pic_freq,
+            contentType: 'application/json',
+            data: JSON.stringify(jsonFreq),
             dataType: 'json',
             success: function() {
                 //console.log(data);
@@ -186,6 +220,10 @@ lightOnSchedule.onchange = function() {
 }
 
 lightOffSchedule.onchange = function() {
+    confirmChange();
+}
+
+picFreq.onchange = function() {
     confirmChange();
 }
 

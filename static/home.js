@@ -1,5 +1,5 @@
-const api_url_chart = '/chart_data';
-const api_url_image = '/image';
+const api_url_chart = '/get_chart_data';
+const api_url_image = '/get_image';
 var last_date = 0;
 //==============================================================
 // Teste img
