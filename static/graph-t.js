@@ -10,7 +10,7 @@ var conductivity_list = [];
 
 
 // Api URL
-const api_url_chart = '/chart_data';
+const api_url_chart = '/get_chart_data';
 
 //==============================================================
 //Range test

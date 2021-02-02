@@ -289,23 +289,23 @@ pointer: {
 // static labels
 staticLabels: {
   font: "10px sans-serif",
-  labels: [0, 1, 2, 4],
+  labels: [0,550, 850, 1000],
   fractionDigits: 1
 },
 
 // static zones
 staticZones: [
-  {strokeStyle: "#F03E3E", min: 0, max: 1},
-  {strokeStyle: "#FFDD00", min: 1, max: 1.2},
-  {strokeStyle: "#30B32D", min: 1.2, max: 2},
-  {strokeStyle: "#FFDD00", min: 2, max: 2.2},
-  {strokeStyle: "#F03E3E", min: 2.2, max: 4}
+  {strokeStyle: "#F03E3E", min: 0, max: 500},
+  {strokeStyle: "#FFDD00", min: 500, max: 550},
+  {strokeStyle: "#30B32D", min: 550, max: 850},
+  {strokeStyle: "#FFDD00", min: 850, max: 900},
+  {strokeStyle: "#F03E3E", min: 900, max: 1000}
 ],
 
 
 // render ticks
 renderTicks: {
-  divisions: 1,
+  divisions: 0,
   divWidth: 1.1,
   divLength: 0.7,
   subDivisions: 3,
@@ -362,7 +362,7 @@ gaugePh.animationSpeed = 32
 
 var targetCond = document.getElementById('conductivity_gauge'); 
 var gaugeCond = new Gauge(targetCond).setOptions(condopts);
-gaugeCond.maxValue = 4;
+gaugeCond.maxValue = 1000;
 gaugeCond.setMinValue(0); 
 gaugeCond.animationSpeed = 32
 

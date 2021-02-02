@@ -1,7 +1,6 @@
 from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for, make_response, send_file, session
 from flask_restful import Api, Resource, reqparse, abort, fields, marshal_with
-from authlib.integrations.flask_client import OAuth
 from werkzeug.wrappers import Response
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
@@ -18,7 +17,7 @@ import glob
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 # App sessions
-app.secret_key = 'jamiley'
+app.secret_key = os.getenv('SECRET_KEY')
 
 # Init restful api
 api = Api(app)
@@ -35,8 +34,8 @@ app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF"]
 app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 
 # Autorização
-user_beleaf = 'beleaf_green'
-password_beleaf = 'beleaf_teste'
+user_beleaf = os.getenv('USER_BELEAF')
+password_beleaf = os.getenv('PASSWORD_BELEAF')
 
 @app.cli.command('initdb')
 def reset_db():
@@ -226,7 +225,7 @@ def csv_data():
     response.headers.set("Content-Disposition", "attachment", filename="log.csv")
     return response
 
-# Rest API for sending JSON to the front end
+# fields de configuração
 measurement_fields = {
     'id': fields.Integer,
     'date_posted': fields.String,
@@ -259,7 +258,7 @@ pic_freq_field = {
     'picFreq': fields.Integer
 }
 
-# Restful API for sending and recieving measurements
+# Restful API recebendo e enviando informações
 class Get_data(Resource):
     @marshal_with(measurement_fields)
     def get(self):
@@ -293,7 +292,6 @@ class Chart_data(Resource):
         return 201
 
 
-# Restful API for sending and recieving configurations
 class Config_data(Resource):
     @marshal_with(config_fields)
     def get(self): 
@@ -412,5 +410,5 @@ api.add_resource(Post_Pic_Freq, '/post_pic_freq')
 
 # Run Server
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host= '0.0.0.0')
+    #app.run(debug=True)
+    app.run(host= '0.0.0.0')
