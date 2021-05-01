@@ -34,8 +34,8 @@ app.config["ALLOWED_IMAGE_EXTENSIONS"] = ["JPEG", "JPG", "PNG", "GIF"]
 app.config["MAX_IMAGE_FILESIZE"] = 0.5 * 1024 * 1024
 
 # Autorização
-user_beleaf = os.getenv('USER_BELEAF')
-password_beleaf = os.getenv('PASSWORD_BELEAF')
+user_beleaf = 'beleaf_green'
+password_beleaf = 'beleaf_teste'
 
 @app.cli.command('initdb')
 def reset_db():
@@ -71,14 +71,18 @@ class Measurement(db.Model):
     temperature = db.Column(db.Float)
     ph = db.Column(db.Float)
     conductivity = db.Column(db.Float)
+    waterflux = db.Column(db.Float)
+    waterlevel = db.Column(db.Integer)
     
-    def __init__(self, date_posted, humidity, light, temperature, ph, conductivity):
+    def __init__(self, date_posted, humidity, light, temperature, ph, conductivity, waterflux, waterlevel):
         self.date_posted = date_posted
         self.humidity = humidity
         self.light = light
         self.temperature = temperature
         self.ph = ph
         self.conductivity = conductivity
+        self.waterflux = waterflux
+        self.waterlevel = waterlevel
 
 
 class Config(db.Model):
@@ -148,6 +152,11 @@ def graph_c():
 @app.route("/graph-l")
 def graph_l():
     return render_template('graph-l.html')
+
+# Detailed graph waterflux
+@app.route("/graph-w")
+def graph_w():
+    return render_template('graph-w.html')
 
 # Controls
 @app.route("/controls")
@@ -233,7 +242,9 @@ measurement_fields = {
     'light': fields.Float,
     'temperature': fields.Float,
     'ph': fields.Float,
-    'conductivity': fields.Float
+    'conductivity': fields.Float,
+    'waterflux': fields.Float,
+    'waterlevel': fields.Integer
 }
 
 config_fields = {
@@ -280,7 +291,9 @@ class Chart_data(Resource):
         temperature = request.json['temperature']
         ph = request.json['ph']
         conductivity = request.json['conductivity']
-        new_measurement = Measurement(date_posted, humidity, light, temperature, ph, conductivity)
+        waterflux = request.json['waterflux']
+        waterlevel = request.json['waterlevel']
+        new_measurement = Measurement(date_posted, humidity, light, temperature, ph, conductivity, waterflux, waterlevel)
         db.session.add(new_measurement)
         db.session.commit()
         return 201
@@ -410,5 +423,5 @@ api.add_resource(Post_Pic_Freq, '/post_pic_freq')
 
 # Run Server
 if __name__ == '__main__':
-    #app.run(debug=True)
-    app.run(host= '0.0.0.0')
+    app.run(debug=True)
+    #app.run(host= '0.0.0.0')

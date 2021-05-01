@@ -375,6 +375,7 @@ var light = document.getElementById("light");
 var temperature = document.getElementById("temperature");
 var ph = document.getElementById("ph");
 var conductivity = document.getElementById("conductivity");
+var waterflux = document.getElementById("waterflux");
 var dot = document.getElementsByClassName('dot')[0];
 
 
@@ -423,6 +424,15 @@ function get_info(){
         
             conductivity.innerHTML = data[0].conductivity;   
             gaugeCond.set(data[0].conductivity);
+
+            waterflux.innerHTML = data[0].waterflux;
+            
+            if(data[0].waterlevel == 1){
+              waterlevel.innerHTML = 'ok';
+              }
+            else{
+              waterlevel.innerHTML = 'abaixo do nível';
+              }
     })
     $.getJSON(api_url_image, function(data) {
       image_path = [];
